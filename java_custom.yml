@@ -1,0 +1,90 @@
+---
+# Setup/install tasks.
+- name: Creates directory
+  become: true
+  file:
+    path: /usr/local/java
+    state: directory
+    mode: 0777
+
+# - name: Download JDK
+#   get_url:
+# yamllint disable-line rule:line-length
+#     url: https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.15%2B10_openj9-0.32.0/ibm-semeru-open-jdk_x64_linux_11.0.15_10_openj9-0.32.0.tar.gz
+#     dest: /usr/local/java
+#     mode: 0440
+
+- name: Unarchive a file that needs to be downloaded (added in 2.0)
+  ansible.builtin.unarchive:
+    # become: true
+    # yamllint disable-line rule:line-length
+    src: https://github.com/ibmruntimes/semeru11-binaries/releases/download/jdk-11.0.15%2B10_openj9-0.32.0/ibm-semeru-open-jdk_x64_linux_11.0.15_10_openj9-0.32.0.tar.gz
+    dest: /usr/local/java
+    remote_src: true
+    mode: 0777
+
+- name: Dir exists
+  become: true
+  stat:
+    path: /usr/local/java
+  register: dirname
+
+- name: File exists
+  become: true
+  stat:
+    path: /usr/bin/java
+  register: javaname
+
+- name: Dir check
+  become: true
+  debug:
+    msg: "The directory exists"
+  when: dirname.stat.exists
+
+- name: File check
+  become: true
+  debug:
+    msg: "The file exists"
+  when: javaname.stat.exists
+
+- name: Update java alternatives
+  become: true
+  ansible.builtin.command: update-alternatives --install /usr/bin/java java /usr/local/java/jdk-11.0.15+10/bin/java 1
+  changed_when: false
+
+- name: Update javac alternatives
+  become: true
+  ansible.builtin.command: update-alternatives --install /usr/bin/javac javac /usr/local/java/jdk-11.0.15+10/bin/javac 1
+  changed_when: false
+
+- name: Set java alternatives
+  become: true
+  ansible.builtin.command: update-alternatives --set java /usr/local/java/jdk-11.0.15+10/bin/java
+  changed_when: false
+
+- name: Set javac alternatives
+  become: true
+  ansible.builtin.command: update-alternatives --set javac /usr/local/java/jdk-11.0.15+10/bin/javac
+  changed_when: false
+
+- name: Java Version
+  become: true
+  ansible.builtin.command: java -version
+  changed_when: false
+  register: javaversion
+
+- name: Print Java Version
+  become: true
+  debug:
+    var: javaversion.stdout_lines
+
+- name: Javac Version
+  become: true
+  ansible.builtin.command: javac -version
+  changed_when: false
+  register: javacversion
+
+- name: Print Javac Version
+  become: true
+  debug:
+    var: javacversion.stdout_lines
