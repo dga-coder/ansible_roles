@@ -1,0 +1,13 @@
+---
+- name: Manage Windows User
+  hosts: all
+  tasks:
+    - name: manage user
+      win_user:
+        name: '{{ win_user_name }}'
+        password: '{{ win_user_pass }}'
+        password_expired: '{{ win_user_pass_expired | default(false) }}'
+        password_never_expires: '{{ win_user_pass_never_exp | default(true) }}'
+        # yamllint disable-line rule:line-length
+        user_cannot_change_password: '{{ win_user_cannot_change_pass | default(true) }}'
+        groups: '{{ win_user_groups | default([]) }}'
