@@ -1,0 +1,18 @@
+---
+- name: Updates Installation
+  hosts: all
+  gather_facts: false
+  vars:
+    win_reboot_timeout: 1200
+    update_category_list:
+      - Updates
+  tasks:
+    - name: Check for Updates
+      win_updates:
+        state: searched
+    - name: Install Windows Updates
+      win_updates:
+        log_path: "{{ update_log_path | default(omit) }}"
+        reboot: yes
+        reboot_timeout: "{{ win_reboot_timeout }}"
+        category_names: "{{ update_category_list }}"
